@@ -1,0 +1,49 @@
+//Creating the table / Meta data
+
+create or replace database exc;
+
+CREATE OR REPLACE SCHEMA external_stages;
+
+
+CREATE OR REPLACE STAGE exc.external_stages.aws_stage
+    url='s3://snowflake-assignments-mc/fileformat/';
+
+
+// Creating ORDERS table
+
+CREATE OR REPLACE TABLE EXC.PUBLIC.customers (
+    ID INT,
+    first_name varchar,
+    last_name varchar,
+    email varchar,
+    age int,
+    city varchar)
+
+CREATE OR REPLACE SCHEMA EXC.file_formats;
+
+CREATE OR REPLACE file format EXC.file_formats.my_file_format
+TYPE = CSV
+FIELD_DELIMITER='|'
+SKIP_HEADER=1;
+
+    
+SELECT * FROM EXC.PUBLIC.customers;
+
+// List files in stage
+
+LIST @EXC.EXTERNAL_STAGES.AWS_STAGE;
+
+DESC file format EXC.file_formats.my_file_format;
+
+
+// Copy command with Stage and File format objects
+
+COPY INTO EXC.PUBLIC.CUSTOMERS
+    FROM @EXC.EXTERNAL_STAGES.AWS_STAGE
+    file_format= (FORMAT_NAME=EXC.FILE_FORMATS.MY_FILE_FORMAT)
+    files = ('customers4.csv')
+    ON_ERROR = 'CONTINUE';
+
+SELECT * FROM EXC.PUBLIC.CUSTOMERS;
+
+

@@ -1,0 +1,35 @@
+//Creating the table / Meta data
+
+create or replace database exc;
+
+CREATE OR REPLACE SCHEMA external_stages;
+
+
+CREATE OR REPLACE STAGE exc.external_stages.aws_stage
+    url='s3://snowflake-assignments-mc/loadingdata/';
+
+
+
+// Creating CUSTOMERS table
+
+CREATE OR REPLACE TABLE EXC.PUBLIC.customers (
+    ID INT,
+    first_name varchar,
+    last_name varchar,
+    email varchar,
+    age int,
+    city varchar);
+    
+SELECT * FROM EXC.PUBLIC.customers;
+
+// List files in stage
+
+LIST @EXC.EXTERNAL_STAGES.AWS_STAGE;
+
+// Copy command with pattern for file names
+
+COPY INTO EXC.PUBLIC.CUSTOMERS
+    FROM @EXC.EXTERNAL_STAGES.AWS_STAGE
+    file_format= (type = csv field_delimiter=';' skip_header=1)
+
+
