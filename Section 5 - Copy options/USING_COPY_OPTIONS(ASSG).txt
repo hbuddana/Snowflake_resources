@@ -1,0 +1,33 @@
+---- VALIDATION_MODE ----
+// Prepare database & table
+CREATE OR REPLACE DATABASE EXC;
+
+CREATE SCHEMA EXC.EXTERNAL_STAGES
+
+CREATE OR REPLACE TABLE  EXC.PUBLIC.EMPLOYEES (
+    CUSTOMER_ID INT,
+    FIRST_NAME VARCHAR(50),
+    LAST_NAME VARCHAR(50),
+    EMAIL VARCHAR(50),
+    AGE INT,
+    DEPARTMENT VARCHAR(50));
+
+// Prepare stage object
+CREATE OR REPLACE STAGE EXC.EXTERNAL_STAGES.AWS_STAGE
+    url='s3://snowflake-assignments-mc/copyoptions/example2';
+  
+LIST @EXC.EXTERNAL_STAGES.AWS_STAGE;
+  
+-- Use validation mode
+COPY INTO EXC.PUBLIC.EMPLOYEES
+    FROM @EXC.EXTERNAL_STAGES.AWS_STAGE
+      file_format= (type = csv field_delimiter=',' skip_header=1)
+      VALIDATION_MODE = RETURN_ERRORS;
+      
+ //Load data using copy command AND DEAL WITH TRUNCATE COLUMNS
+COPY INTO EXC.PUBLIC.EMPLOYEES
+    FROM @EXC.EXTERNAL_STAGES.AWS_STAGE
+    file_format= (type = csv field_delimiter=',' skip_header=1)
+    --pattern='.*employees.*'
+    TRUNCATECOLUMNS = true; 
+    
