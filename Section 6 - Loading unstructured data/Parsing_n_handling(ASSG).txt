@@ -1,0 +1,49 @@
+// First step: Load Raw JSON
+
+CREATE OR REPLACE stage EXC.EXTERNAL_STAGES.JSONSTAGE
+     url='s3://snowflake-assignments-mc/unstructureddata/';
+
+create schema exc.file_formats
+  
+CREATE OR REPLACE file format EXC.FILE_FORMATS.JSONFORMAT
+    TYPE = JSON;
+    
+    
+CREATE OR REPLACE table EXC.PUBLIC.JSON_RAW (
+    raw_file variant);
+
+LIST @EXC.EXTERNAL_STAGES.JSONSTAGE
+    
+COPY INTO exc.PUBLIC.JSON_RAW
+    FROM @EXC.EXTERNAL_STAGES.JSONSTAGE
+    file_format= EXC.FILE_FORMATS.JSONFORMAT
+    files = ('Jobskills.json');
+    
+   
+SELECT * FROM EXC.PUBLIC.JSON_RAW;
+
+--
+
+SELECT * FROM JSON_RAW;
+
+// Selecting attribute/column
+SELECT 
+$1:first_name::STRING,
+$1:last_name::STRING,
+$1:Skills[0]::STRING,
+$1:Skills[1]::STRING
+FROM JSON_RAW;
+
+
+// Copy data in table
+CREATE TABLE SKILLS AS
+SELECT 
+$1:first_name::STRING as first_name,
+$1:last_name::STRING as last_name,
+$1:Skills[0]::STRING as Skill_1,
+$1:Skills[1]::STRING as Skill_2
+FROM JSON_RAW;
+
+// Query from table
+SELECT * FROM SKILLS
+WHERE FIRST_NAME='Florina';
